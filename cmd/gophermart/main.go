@@ -25,6 +25,6 @@ func init() {
 func main() {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Second))
 	defer cancel()
-	//TODO: graceful shutdown
+
 	server.Init(ctx)
 }
