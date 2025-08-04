@@ -24,3 +24,5 @@ vendor/
 
 docker/postgres-data
 docker/.env
+
+.env
