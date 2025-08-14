@@ -10,6 +10,7 @@ type Config struct {
 	DatabaseURL       string `env:"DATABASE_URI"`
 	RunAddr           string `env:"RUN_ADDRESS"`
 	AccrualSystemAddr string `env:"ACCULAR_SYSTEM_ADDRESS"`
+	SecretKey         string `env:"SECRET_KEY"`
 }
 
 func New() *Config {
@@ -22,5 +23,6 @@ func New() *Config {
 		DatabaseURL:       os.Getenv("DATABASE_URI"),
 		RunAddr:           os.Getenv("RUN_ADDRESS"),
 		AccrualSystemAddr: os.Getenv("ACCULAR_SYSTEM_ADDRESS"),
+		SecretKey:         os.Getenv("SECRET_KEY"),
 	}
 }
