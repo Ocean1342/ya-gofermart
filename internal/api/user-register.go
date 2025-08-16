@@ -51,7 +51,7 @@ func (h *Handler) UserRegister(w http.ResponseWriter, r *http.Request) {
 	//TODO: проверить ошибку sql на дубль, вдруг что то происходит
 	if err != nil {
 		w.WriteHeader(http.StatusConflict)
-		logger.Errorf("joooopa user login:`%s` already exists. err:`%s`", userRegisterRequest.Login, err)
+		logger.Errorf("user login:`%s` already exists. err:`%s`", userRegisterRequest.Login, err)
 		w.Write([]byte(fmt.Sprintf("user login:`%s` already exists", userRegisterRequest.Login)))
 		return
 	}
