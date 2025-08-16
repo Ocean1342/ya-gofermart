@@ -23,7 +23,7 @@ func main() {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(10*time.Second))
 	defer cancel()
 	repo := storage.New(ctx, cfg.DatabaseURL)
-	jwtAuth := auth.New(cfg.SecretKey)
+	jwtAuth := auth.New(cfg.SecretKey, cfg.TokenTTL)
 	handler := api.New(repo, jwtAuth)
 	server.Init(ctx, cfg, handler)
 }

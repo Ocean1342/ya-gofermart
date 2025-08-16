@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5"
+	"github.com/randallmlough/pgxscan"
 	log "github.com/sirupsen/logrus"
 	"os"
 )
@@ -50,4 +51,15 @@ func (p *PGStorage) GetUserByLogin(ctx context.Context, login string) (*User, er
 		return nil, fmt.Errorf("scan rows error. err: %s", err)
 	}
 	return user, nil
+}
+
+func (p *PGStorage) CreateUser(ctx context.Context, login string, password string) (*User, error) {
+	var user User
+	sql := "INSERT INTO users (login,password) VALUES($1,$2) RETURNING id, login, password"
+	row := p.Connection.QueryRow(ctx, sql, login, password)
+	err := pgxscan.NewScanner(row).Scan(&user.ID, &user.Login, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

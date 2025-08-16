@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/Ocean1342/ya-gofermart/pkg/common"
 	"github.com/Ocean1342/ya-gofermart/utis"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
@@ -8,8 +9,6 @@ import (
 	"io"
 	"net/http"
 )
-
-const XRequestId = "X-Request-ID"
 
 type logResponseWriter struct {
 	innerWriter http.ResponseWriter
@@ -20,7 +19,7 @@ func (l *logResponseWriter) Header() http.Header {
 	return l.innerWriter.Header()
 }
 func (l *logResponseWriter) Write(b []byte) (int, error) {
-	l.Header().Set(XRequestId, l.reqID)
+	l.Header().Set(common.XRequestId, l.reqID)
 	logrus.Debugf("RESPONSE: REQUEST-ID: `%s`, body: `%s`, headers: `%s`", l.reqID, string(b), l.Header())
 	return l.innerWriter.Write(b)
 }
@@ -33,11 +32,11 @@ func loggable(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		reqCopy, err := utis.CopyHTTPRequest(r)
 		if err != nil {
-			logrus.Errorf("")
+			logrus.Errorf("could not copy request")
 		}
 		reqID, ok := r.Context().Value(middleware.RequestIDKey).(string)
 		if !ok || reqID == "" {
-			reqIDFromHeader := r.Header.Get(XRequestId)
+			reqIDFromHeader := r.Header.Get(common.XRequestId)
 			if reqIDFromHeader == "" {
 				reqID = uuid.New().String()
 				logrus.Errorf("empty request id. set manualy")
