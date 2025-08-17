@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/Ocean1342/ya-gofermart/pkg/common"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -55,10 +56,12 @@ func (h *Handler) UserRegister(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("user login:`%s` already exists", userRegisterRequest.Login)))
 		return
 	}
-	logger.Debugf("user login:`%s` password:`%s` created", user.Login, user.Password)
-	//сохранять токен
-
-	//на все ошибки отдавать 400
-	//проверить уникальность логина, если не уникален, то 409
-	//добавить в заголовок полученный токен Authorization: Bearer <token>
+	token, err := h.Auth.CreateToken(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not create token. err: %v", err)))
+		return
+	}
+	logger.Debugf("user login:`%s` password:`%s` token:`%s` created", user.Login, user.Password, token)
+	w.Header().Set(common.AuthorizationHeaderName, fmt.Sprintf("Bearer %s", string(token)))
 }

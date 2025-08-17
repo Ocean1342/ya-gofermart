@@ -19,7 +19,7 @@ func Init(ctx context.Context, cfg *config.Config, handler *api.Handler) {
 	})
 	r.Post("/api/user/register", handler.UserRegister)
 	r.Post("/api/user/login", handler.UserAuth)
-	r.With(authable).Post("/api/user/orders", handler.LoadOrderNumber)
+	r.With(handler.Authenticate).Post("/api/user/orders", handler.LoadOrderNumber)
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: r,

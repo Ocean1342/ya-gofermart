@@ -40,17 +40,17 @@ type User struct {
 }
 
 func (p *PGStorage) GetUserByLogin(ctx context.Context, login string) (*User, error) {
-	var user *User
+	var user User
 	sql := "SELECT id, login, password FROM users WHERE login = $1"
 	row := p.Connection.QueryRow(ctx, sql, login)
 	if row == nil {
 		return nil, fmt.Errorf("user not found")
 	}
-	err := row.Scan(user.ID, user.Login, user.Password)
+	err := pgxscan.NewScanner(row).Scan(&user.ID, &user.Login, &user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("scan rows error. err: %s", err)
 	}
-	return user, nil
+	return &user, nil
 }
 
 func (p *PGStorage) CreateUser(ctx context.Context, login string, password string) (*User, error) {
