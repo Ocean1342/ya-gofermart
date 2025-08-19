@@ -1,16 +1,15 @@
 package server
 
 import (
-	"context"
-	"github.com/Ocean1342/ya-gofermart/config"
-	"github.com/Ocean1342/ya-gofermart/internal/api"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
+	"gofermart/config"
+	"gofermart/internal/api"
 	"net/http"
 )
 
-func Init(ctx context.Context, cfg *config.Config, handler *api.Handler) {
+func Init(cfg *config.Config, handler *api.Handler) {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(loggable)
@@ -21,7 +20,7 @@ func Init(ctx context.Context, cfg *config.Config, handler *api.Handler) {
 	r.Post("/api/user/login", handler.UserAuth)
 	r.With(handler.Authenticate).Post("/api/user/orders", handler.LoadOrderNumber)
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    cfg.RunAddr,
 		Handler: r,
 	}
 	err := server.ListenAndServe()

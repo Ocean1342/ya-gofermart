@@ -1,4 +1,7 @@
 package common
 
-const XRequestId = "X-Request-ID"
-const AuthorizationHeaderName = "Authorization"
+const (
+	XRequestId              = "X-Request-ID"
+	AuthorizationHeaderName = "Authorization"
+	CtxUser                 = "user"
+)

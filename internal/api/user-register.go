@@ -3,20 +3,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Ocean1342/ya-gofermart/pkg/common"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
+	"gofermart/pkg/common"
 	"io"
 	"net/http"
 )
 
-/*
-TODO:
-
-	структура запроса
-	структура ответа
-	мидл вар для проверки токенов на определённые ручки
-*/
 type UserRegisterRequest struct {
 	Login    string `json:"login,required"`
 	Password string `json:"password,required"`

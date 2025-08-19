@@ -3,9 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Ocean1342/ya-gofermart/pkg/common"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
+	"gofermart/pkg/common"
 	"io"
 	"net/http"
 )

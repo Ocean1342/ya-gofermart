@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/Ocean1342/ya-gofermart/internal/auth"
-	"github.com/Ocean1342/ya-gofermart/internal/storage"
+	"gofermart/internal/auth"
+	"gofermart/internal/storage"
 )
 
 type Handler struct {

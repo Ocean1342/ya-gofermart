@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/Ocean1342/ya-gofermart/pkg/common"
-	"github.com/Ocean1342/ya-gofermart/utis"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"gofermart/pkg/common"
+	"gofermart/utis"
 	"io"
 	"net/http"
 )

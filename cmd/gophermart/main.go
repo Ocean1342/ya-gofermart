@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/Ocean1342/ya-gofermart/config"
-	"github.com/Ocean1342/ya-gofermart/internal/api"
-	"github.com/Ocean1342/ya-gofermart/internal/auth"
-	"github.com/Ocean1342/ya-gofermart/internal/server"
-	"github.com/Ocean1342/ya-gofermart/internal/storage"
 	log "github.com/sirupsen/logrus"
+	"gofermart/config"
+	"gofermart/internal/api"
+	"gofermart/internal/auth"
+	"gofermart/internal/server"
+	"gofermart/internal/storage"
 	"os"
 	"time"
 )
@@ -25,5 +25,5 @@ func main() {
 	repo := storage.New(ctx, cfg.DatabaseURL)
 	jwtAuth := auth.New(cfg.SecretKey, cfg.TokenTTL)
 	handler := api.New(repo, jwtAuth)
-	server.Init(ctx, cfg, handler)
+	server.Init(cfg, handler)
 }

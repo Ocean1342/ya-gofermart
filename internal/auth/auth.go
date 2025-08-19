@@ -2,9 +2,9 @@ package auth
 
 import (
 	"fmt"
-	"github.com/Ocean1342/ya-gofermart/internal/storage"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/sirupsen/logrus"
+	"gofermart/internal/storage"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )

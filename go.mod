@@ -1,19 +1,16 @@
-module github.com/Ocean1342/ya-gofermart
+module gofermart
 
 go 1.24.4
 
 require (
 	github.com/go-chi/chi/v5 v5.2.2
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
+	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
-	//github.com/randallmlough/pgxscan@v0.3.0
 	github.com/randallmlough/pgxscan v0.3.0
 	github.com/sirupsen/logrus v1.9.3
-)
-
-require (
-	github.com/golang-jwt/jwt/v4 v4.5.2
 	golang.org/x/crypto v0.41.0
 )
 
