@@ -11,8 +11,8 @@ import (
 )
 
 type UserRegisterRequest struct {
-	Login    string `json:"login,required"`
-	Password string `json:"password,required"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 func (h *Handler) UserRegister(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +38,7 @@ func (h *Handler) UserRegister(w http.ResponseWriter, r *http.Request) {
 	hashPassword, err := h.Auth.CreateHash(userRegisterRequest.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(fmt.Sprint("could not create hash for password")))
+		w.Write([]byte("could not create hash for password"))
 		return
 	}
 	user, err := h.Storage.CreateUser(r.Context(), userRegisterRequest.Login, hashPassword)

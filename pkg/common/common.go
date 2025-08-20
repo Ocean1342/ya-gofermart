@@ -1,7 +1,15 @@
 package common
 
+var CtxUser User
+
+func init() {
+	CtxUser = User{}
+}
+
+type User struct {
+}
+
 const (
-	XRequestId              = "X-Request-ID"
+	XRequestID              = "X-Request-ID"
 	AuthorizationHeaderName = "Authorization"
-	CtxUser                 = "user"
 )

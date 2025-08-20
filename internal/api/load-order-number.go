@@ -24,7 +24,7 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 	if !ok || ctxUser == nil {
 		logger.Errorf("could not extract user from context")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("could not define user")))
+		w.Write([]byte("could not define user"))
 		return
 	}
 	bodyBytes, err := io.ReadAll(r.Body)
@@ -41,7 +41,7 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 	}
 	if orderID == 0 {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("order id must be greater than 0")))
+		w.Write([]byte("order id must be greater than 0"))
 		return
 	}
 	logger.Infof("user id:`%d` login:`%s` trying put order id:`%d`", ctxUser.ID, ctxUser.Login, orderID)
@@ -53,22 +53,22 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 		if errors.As(err, &pgError) {
 			if pgerrcode.IsConnectionException(pgError.Code) {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("connection error")))
+				w.Write([]byte("connection error"))
 				return
 			}
 			if pgerrcode.IsIntegrityConstraintViolation(pgError.Code) {
 				w.WriteHeader(http.StatusConflict)
-				w.Write([]byte(fmt.Sprintf("order was already loaded")))
+				w.Write([]byte("order was already loaded"))
 				return
 			}
 			if pgerrcode.IsSyntaxErrororAccessRuleViolation(pgError.Code) {
 				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte(fmt.Sprintf("syntax error")))
+				w.Write([]byte("syntax error"))
 				logger.Errorf("syntax error on save order. err:`%s`", pgError.Error())
 				return
 			}
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(fmt.Sprintf("unexpected error")))
+			w.Write([]byte("unexpected error"))
 			logger.Errorf("error on save order. err:`%s`", pgError.Error())
 			return
 		}

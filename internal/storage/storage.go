@@ -50,9 +50,6 @@ func (p *PGStorage) GetUserByLogin(ctx context.Context, login string) (*User, er
 	var user User
 	sql := "SELECT id, login, password FROM users WHERE login = $1"
 	row := p.Connection.QueryRow(ctx, sql, login)
-	if row == nil {
-		return nil, fmt.Errorf("user not found")
-	}
 	err := pgxscan.NewScanner(row).Scan(&user.ID, &user.Login, &user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("scan rows error. err: %s", err)

@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sirupsen/logrus"
 	"gofermart/internal/auth"
@@ -20,21 +19,21 @@ func (h *Handler) Authenticate(next http.Handler) http.Handler {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(fmt.Sprintf("user not found")))
+			w.Write([]byte("user not found"))
 			return
 		}
 		token, found := strings.CutPrefix(authHeader, "Bearer ")
 		if !found {
-			logger.Errorf("error with cut token prefix token: %s %s %s", authHeader, token, found)
+			logger.Errorf("error with cut token prefix token: %s %s %t", authHeader, token, found)
 			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte(fmt.Sprintf("user not found")))
+			w.Write([]byte("user not found"))
 			return
 		}
 		user, err := h.Auth.GetUserFromToken(auth.Token(token))
 		if err != nil || user == nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			logger.Errorf("get user from token error:`%s`", err)
-			w.Write([]byte(fmt.Sprintf("user not found")))
+			w.Write([]byte("user not found"))
 			return
 		}
 		logger.Infof("auth user login:`%s`", user.Login)

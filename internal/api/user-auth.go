@@ -8,11 +8,12 @@ import (
 	"gofermart/pkg/common"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type UserAuthRequest struct {
-	Login    string `json:"login,required"`
-	Password string `json:"password,required"`
+	Login    string `json:"login"`
+	Password string `json:"password"`
 }
 
 func (h *Handler) UserAuth(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +34,12 @@ func (h *Handler) UserAuth(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("failed to read request body. err: %v", err)))
 		return
 	}
+	if !validateUserAuthRequest(userAuthRequest) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("validation failed"))
+		return
+	}
+
 	user, err := h.Storage.GetUserByLogin(r.Context(), userAuthRequest.Login)
 	if err != nil || user == nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -40,7 +47,7 @@ func (h *Handler) UserAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if !h.Auth.CompareHashAndPassword(userAuthRequest.Password, user.Password) {
-		logger.Errorf("401: %s %s", userAuthRequest, user)
+		logger.Errorf("compare hash and password fail for user: %s", userAuthRequest.Login)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -54,4 +61,11 @@ func (h *Handler) UserAuth(w http.ResponseWriter, r *http.Request) {
 	logger.Debugf("user login:`%s` password:`%s` token:`%s` created", user.Login, user.Password, token)
 	w.Header().Set(common.AuthorizationHeaderName, fmt.Sprintf("Bearer %s", string(token)))
 
+}
+
+func validateUserAuthRequest(request UserAuthRequest) bool {
+	if strings.TrimSpace(request.Login) != "" && strings.TrimSpace(request.Login) != "" {
+		return true
+	}
+	return false
 }

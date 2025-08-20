@@ -56,7 +56,7 @@ func (j *JWTAuth) GetUserFromToken(token Token) (*storage.User, error) {
 		return []byte(j.secret), nil
 	})
 	if err != nil {
-		logrus.Errorf("could not parse token. err:`%s`, token:`%s`", token)
+		logrus.Errorf("could not parse token. err:`%s`, token:`%s`", err, token)
 		return nil, fmt.Errorf("could not parse token. err:`%s`", err)
 	}
 	return claims.User, nil

@@ -19,7 +19,7 @@ func (l *logResponseWriter) Header() http.Header {
 	return l.innerWriter.Header()
 }
 func (l *logResponseWriter) Write(b []byte) (int, error) {
-	l.Header().Set(common.XRequestId, l.reqID)
+	l.Header().Set(common.XRequestID, l.reqID)
 	logrus.Debugf("RESPONSE: REQUEST-ID: `%s`, body: `%s`, headers: `%s`", l.reqID, string(b), l.Header())
 	return l.innerWriter.Write(b)
 }
@@ -36,7 +36,7 @@ func loggable(next http.Handler) http.Handler {
 		}
 		reqID, ok := r.Context().Value(middleware.RequestIDKey).(string)
 		if !ok || reqID == "" {
-			reqIDFromHeader := r.Header.Get(common.XRequestId)
+			reqIDFromHeader := r.Header.Get(common.XRequestID)
 			if reqIDFromHeader == "" {
 				reqID = uuid.New().String()
 				logrus.Errorf("empty request id. set manualy")
@@ -46,6 +46,9 @@ func loggable(next http.Handler) http.Handler {
 			}
 		}
 		bodyBytes, err := io.ReadAll(reqCopy.Body)
+		if err != nil {
+			logrus.Warnf("coulnd not read request body.err:`%s`", err)
+		}
 		logrus.Debugf("REQUEST: REQUEST-ID:`%s`.url:`%s`. method:`%s` body: `%s`. headers: `%s`",
 			reqID, reqCopy.RequestURI, reqCopy.Method, string(bodyBytes), reqCopy.Header)
 		logRW := &logResponseWriter{innerWriter: w, reqID: reqID}
