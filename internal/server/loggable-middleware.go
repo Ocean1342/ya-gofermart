@@ -19,12 +19,14 @@ func (l *logResponseWriter) Header() http.Header {
 	return l.innerWriter.Header()
 }
 func (l *logResponseWriter) Write(b []byte) (int, error) {
-	l.Header().Set(common.XRequestID, l.reqID)
 	logrus.Debugf("RESPONSE: REQUEST-ID: `%s`, body: `%s`, headers: `%s`", l.reqID, string(b), l.Header())
 	return l.innerWriter.Write(b)
 }
 
 func (l *logResponseWriter) WriteHeader(statusCode int) {
+	l.Header().Set(common.XRequestID, l.reqID)
+	l.Header().Set("Content-Type", "application/json")
+	logrus.Debugf("RESPONSE: REQUEST-ID: `%s`,status code: `%d`", l.reqID, statusCode)
 	l.innerWriter.WriteHeader(statusCode)
 }
 

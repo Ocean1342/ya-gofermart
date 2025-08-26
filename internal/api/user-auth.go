@@ -64,7 +64,7 @@ func (h *Handler) UserAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateUserAuthRequest(request UserAuthRequest) bool {
-	if strings.TrimSpace(request.Login) != "" && strings.TrimSpace(request.Login) != "" {
+	if strings.TrimSpace(request.Login) != "" && strings.TrimSpace(request.Password) != "" {
 		return true
 	}
 	return false

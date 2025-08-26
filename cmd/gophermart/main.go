@@ -34,7 +34,12 @@ func main() {
 
 func migrate(dbURL string) {
 	db, err := sql.Open("pgx", dbURL)
-	defer db.Close()
+	defer func() {
+		err = db.Close()
+		if err != nil {
+			log.Errorf("could not close db connection:%s", err)
+		}
+	}()
 	if err != nil {
 		panic("could not run migration")
 	}
