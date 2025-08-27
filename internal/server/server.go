@@ -13,13 +13,11 @@ func Init(cfg *config.Config, handler *api.Handler) {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(loggable)
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
-	})
 	r.Post("/api/user/register", handler.UserRegister)
 	r.Post("/api/user/login", handler.UserAuth)
 	r.With(handler.Authenticate).Post("/api/user/orders", handler.LoadOrderNumber)
 	r.With(handler.Authenticate).Get("/api/user/orders", handler.GetOrders)
+	r.With(handler.Authenticate).Get("/api/user/balance", handler.GetUserBalance)
 
 	server := &http.Server{
 		Addr:    cfg.RunAddr,

@@ -12,7 +12,7 @@ import (
 
 type Order struct {
 	ID         int    `json:"number"`
-	UserID     int    `json:"user_id"`
+	UserID     int    `json:"-"`
 	Status     string `json:"status"`
 	Accrual    int    `json:"accrual,omitempty"`
 	UploadedAt string `json:"uploaded_at"`
@@ -36,7 +36,7 @@ func (h *Handler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 	orders, err := h.Storage.GetOrders(r.Context(), ctxUser.ID)
 	if err != nil {
-		logger.Errorf("user id:`%s` error get orders: %s", ctxUser.ID, err)
+		logger.Errorf("user id:`%d` error get orders: %s", ctxUser.ID, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte("could not define user"))
 		if err != nil {
