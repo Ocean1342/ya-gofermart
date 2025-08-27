@@ -11,9 +11,10 @@ import (
 )
 
 type Order struct {
-	ID         int    `json:"id"`
+	ID         int    `json:"number"`
 	UserID     int    `json:"user_id"`
 	Status     string `json:"status"`
+	Accrual    int    `json:"accrual,omitempty"`
 	UploadedAt string `json:"uploaded_at"`
 	UpdatedAt  string `json:"updated_at"`
 }
@@ -63,13 +64,14 @@ func (h *Handler) GetOrders(w http.ResponseWriter, r *http.Request) {
 func hydrate(orders []*storage.Order) []*Order {
 	res := make([]*Order, len(orders))
 	for i, o := range orders {
-		hOrder := &Order{}
-		hOrder.ID = o.ID
-		hOrder.UserID = o.UserID
-		hOrder.Status = o.Status
-		hOrder.UploadedAt = o.UploadedAt.Format(time.RFC3339)
-		hOrder.UpdatedAt = o.UpdatedAt.Time.Format(time.RFC3339)
-		res[i] = hOrder
+		hydratedOrder := &Order{}
+		hydratedOrder.ID = o.ID
+		hydratedOrder.UserID = o.UserID
+		hydratedOrder.Status = o.Status
+		hydratedOrder.Accrual = o.Accrual
+		hydratedOrder.UploadedAt = o.UploadedAt.Format(time.RFC3339)
+		hydratedOrder.UpdatedAt = o.UpdatedAt.Time.Format(time.RFC3339)
+		res[i] = hydratedOrder
 	}
 	return res
 }

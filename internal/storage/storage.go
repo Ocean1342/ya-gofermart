@@ -29,6 +29,7 @@ type Order struct {
 	ID         int          `db:"id"`
 	UserID     int          `db:"user_id"`
 	Status     string       `db:"status"`
+	Accrual    int          `db:"accrual"`
 	UploadedAt time.Time    `db:"uploaded_at"`
 	UpdatedAt  sql.NullTime `db:"updated_at"`
 }
@@ -81,14 +82,14 @@ func (p *PGStorage) GetOrder(ctx context.Context, orderID int) (*Order, error) {
 
 func (p *PGStorage) GetOrders(ctx context.Context, userID int) ([]*Order, error) {
 	var orders []*Order
-	sql := "SELECT id, user_id, status, uploaded_at, updated_at FROM orders WHERE user_id = $1 ORDER BY uploaded_at DESC"
+	sql := "SELECT id, user_id, status, accrual, uploaded_at, updated_at FROM orders WHERE user_id = $1 ORDER BY uploaded_at DESC"
 	row, err := p.Connection.Query(ctx, sql, userID)
 	if err != nil {
 		return nil, err
 	}
 	for row.Next() {
 		var order Order
-		err = pgxscan.NewScanner(row).Scan(&order.ID, &order.UserID, &order.Status, &order.UploadedAt, &order.UpdatedAt)
+		err = pgxscan.NewScanner(row).Scan(&order.ID, &order.UserID, &order.Status, &order.Accrual, &order.UploadedAt, &order.UpdatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("scan rows error. err: %s", err)
 		}
