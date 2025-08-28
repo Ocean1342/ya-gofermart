@@ -18,6 +18,7 @@ func Init(cfg *config.Config, handler *api.Handler) {
 	r.With(handler.Authenticate).Post("/api/user/orders", handler.LoadOrderNumber)
 	r.With(handler.Authenticate).Get("/api/user/orders", handler.GetOrders)
 	r.With(handler.Authenticate).Get("/api/user/balance", handler.GetUserBalance)
+	r.With(handler.Authenticate).Post("/api/user/balance/withdraw", handler.UserWithdraw)
 
 	server := &http.Server{
 		Addr:    cfg.RunAddr,
