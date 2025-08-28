@@ -59,6 +59,11 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 	logger.Infof("user id:%d login:%s trying put order id:%d", ctxUser.ID, ctxUser.Login, orderID)
 
 	existedOrder, err := h.Storage.GetOrder(r.Context(), orderID)
+	if err != nil {
+		logger.Errorf("could not get order. err:%s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	if existedOrder != nil && ctxUser.ID == existedOrder.UserID {
 		w.WriteHeader(http.StatusOK)
 		return

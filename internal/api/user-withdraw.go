@@ -122,6 +122,19 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	}
 	addDrawHistorySQL := `INSERT INTO user_draw_history (user_id, transaction_dt, order_id, draw) VALUES($1,$2,$3,$4)`
 	_, err = tx.Exec(r.Context(), addDrawHistorySQL, ctxUser.ID, time.Now(), withdrawRequest.Order, common.MoneyFloatToInt(withdrawRequest.Sum))
+	if err != nil {
+		err = tx.Rollback(r.Context())
+		if err != nil {
+			logger.Errorf("user id:`%d` could not rollback transaction. err:%s", ctxUser.ID, err)
+		}
+		logger.Errorf("user id:`%d` could not update draw history. err:%s", ctxUser.ID, err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_, err = w.Write([]byte("could not update draw history"))
+		if err != nil {
+			logger.Errorf("could not write data to response")
+		}
+		return
+	}
 	err = tx.Commit(r.Context())
 	if err != nil {
 		logger.Errorf("user id:`%d` could not commit tx. err:%s", ctxUser.ID, err)

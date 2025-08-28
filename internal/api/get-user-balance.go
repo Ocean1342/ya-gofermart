@@ -33,7 +33,7 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	}
 	userBalance, err := h.Storage.GetUserBalanceWithDraw(r.Context(), ctxUser.ID)
 	if err != nil {
-		if errors.As(err, &pgx.ErrNoRows) {
+		if errors.Is(err, pgx.ErrNoRows) {
 			userBalanceWithDraw := UserBalanceResponse{
 				Current:  0,
 				Withdraw: 0,
