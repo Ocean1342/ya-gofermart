@@ -13,4 +13,5 @@ type Storage interface {
 	SaveOrder(ctx context.Context, orderID int, userID int, status string) (*Order, error)
 	GetOrders(ctx context.Context, userID int) ([]*Order, error)
 	GetUserBalanceWithDraw(ctx context.Context, userID int) (*UserBalanceWithDraw, error)
+	GetUserDrawHistory(ctx context.Context, userID int) ([]*UserWithDraw, error)
 }

@@ -13,6 +13,7 @@ func Init(cfg *config.Config, handler *api.Handler) {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(loggable)
+	r.Use(decompressable)
 	r.Post("/api/user/register", handler.UserRegister)
 	r.Post("/api/user/login", handler.UserAuth)
 	r.With(handler.Authenticate).Post("/api/user/orders", handler.LoadOrderNumber)

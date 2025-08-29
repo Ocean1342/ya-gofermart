@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/randallmlough/pgxscan"
+	"time"
 )
 
 type User struct {
@@ -17,6 +18,13 @@ type UserBalanceWithDraw struct {
 	UserID   int           `db:"user_id"`
 	Balance  int           `db:"balance"`
 	WithDraw sql.NullInt64 `db:"draw"`
+}
+
+type UserWithDraw struct {
+	UserID        int           `db:"user_id"`
+	WithDraw      sql.NullInt64 `db:"draw"`
+	OrderID       int           `db:"order_id"`
+	TransactionDT time.Time     `db:"transaction_dt"`
 }
 
 func (p *PGStorage) GetUserByLogin(ctx context.Context, login string) (*User, error) {
@@ -54,4 +62,24 @@ func (p *PGStorage) GetUserBalanceWithDraw(ctx context.Context, userID int) (*Us
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (p *PGStorage) GetUserDrawHistory(ctx context.Context, userID int) ([]*UserWithDraw, error) {
+	var res []*UserWithDraw
+	sqlQuery := `SELECT user_id, transaction_dt, order_id, draw 
+				 FROM user_draw_history
+				 WHERE user_id=$1`
+	rows, err := p.Connection.Query(ctx, sqlQuery, userID)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var el UserWithDraw
+		err = rows.Scan(&el.UserID, &el.TransactionDT, &el.OrderID, &el.WithDraw)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, &el)
+	}
+	return res, nil
 }

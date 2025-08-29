@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sirupsen/logrus"
 	"gofermart/internal/storage"
@@ -59,7 +60,7 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 	logger.Infof("user id:%d login:%s trying put order id:%d", ctxUser.ID, ctxUser.Login, orderID)
 
 	existedOrder, err := h.Storage.GetOrder(r.Context(), orderID)
-	if err != nil {
+	if err != nil && !errors.As(err, &pgx.ErrNoRows) {
 		logger.Errorf("could not get order. err:%s", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
