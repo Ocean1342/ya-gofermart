@@ -33,6 +33,7 @@ func (s *System) OrderProcess(orderID int) *http.Response {
 		l.Errorf("could not send request to accrual system. err:%s", err)
 		return nil
 	}
+	l.Infof("successfull sended request")
 	return resp
 }
 
