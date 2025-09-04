@@ -28,6 +28,6 @@ func Init(cfg *config.Config, handler *api.Handler) {
 	}
 	err := server.ListenAndServe()
 	if err != nil {
-		logrus.Errorf("could not start server. err: %s", err)
+		logrus.Errorf("could not start server. err: %v", err)
 	}
 }

@@ -48,7 +48,7 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, err = w.Write([]byte(fmt.Sprintf("could not unmarshal body. err: %v", err)))
 		if err != nil {
-			logger.Errorf("could not write data to response err: %s", err)
+			logger.Errorf("could not write data to response err: %v", err)
 		}
 		return
 	}
@@ -56,7 +56,7 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		_, err = w.Write([]byte("order id must be greater than 0"))
 		if err != nil {
-			logger.Errorf("could not write data to response. err: %s", err)
+			logger.Errorf("could not write data to response. err: %v", err)
 		}
 		return
 	}

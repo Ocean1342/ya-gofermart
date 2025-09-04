@@ -78,14 +78,14 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 		var acResp AccrualResponse
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
-			logger.Errorf("could not read resp body. err: %s", err)
+			logger.Errorf("could not read resp body. err: %v", err)
 			item.RetryTimes++
 			op.Queue <- item
 			return
 		}
 		err = json.Unmarshal(bytes, &acResp)
 		if err != nil {
-			logger.Errorf("could not unmarshal resp body. err: %s", err)
+			logger.Errorf("could not unmarshal resp body. err: %v", err)
 			item.RetryTimes++
 			op.Queue <- item
 			return
@@ -109,8 +109,10 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 			logger.Errorf("recived 204. orderID %d read body err:%s", item.OrderID, err)
 		}
 		logger.Errorf("recived 204. orderID %d response body: %s", item.OrderID, string(bytes))
-		item.RetryTimes++
-		op.Queue <- item
+		err = op.Storage.UpdateOrderAndBalance(ctx, item.OrderID, item.UserID, 0, "INVALID")
+		if err != nil {
+			logger.Errorf("could not change status for order id:%d", item.OrderID)
+		}
 	case 429:
 		logger.Errorf("too many requests.sleeps for 60 sec")
 		time.Sleep(60 * time.Second)

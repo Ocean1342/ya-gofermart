@@ -15,7 +15,7 @@ func CopyHTTPRequest(req *http.Request) (*http.Request, error) {
 	defer func() {
 		err = req.Body.Close()
 		if err != nil {
-			logrus.Errorf("could not close request bodyBytes on copy. err: %s", err)
+			logrus.Errorf("could not close request bodyBytes on copy. err: %v", err)
 		}
 	}()
 	copyReq := req.Clone(req.Context())
@@ -34,7 +34,7 @@ func CopyHTTPResponse(resp *http.Response) (*http.Response, error) {
 	defer func() {
 		err = resp.Body.Close()
 		if err != nil {
-			logrus.Errorf("could not close response body on copy. err: %s", err)
+			logrus.Errorf("could not close response body on copy. err: %v", err)
 		}
 	}()
 	newBody := io.NopCloser(bytes.NewReader(bodyBytes))
