@@ -21,5 +21,5 @@ func MoneyFloatToInt(in float64) int {
 }
 
 func MoneyIntToFloat(in int) float64 {
-	return float64(in / 100)
+	return float64(in) / 100.0
 }

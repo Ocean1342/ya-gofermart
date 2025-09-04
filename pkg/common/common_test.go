@@ -40,3 +40,27 @@ func TestMoneyFloatToInt(t *testing.T) {
 		})
 	}
 }
+
+func TestMoneyIntToFloat(t *testing.T) {
+	type args struct {
+		in int
+	}
+	tests := []struct {
+		name string
+		args args
+		want float64
+	}{
+		{
+			"case 1 729.28",
+			args{in: 72928},
+			729.28,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := MoneyIntToFloat(tt.args.in); got != tt.want {
+				t.Errorf("MoneyIntToFloat() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
