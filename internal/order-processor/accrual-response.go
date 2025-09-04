@@ -1,13 +1,14 @@
 package orderprocessor
 
 import (
+	"gofermart/pkg/common"
 	"strconv"
 )
 
 type AccrualResponse struct {
 	Order   string
 	Status  string
-	Accrual int
+	Accrual float64
 }
 
 func (a *AccrualResponse) GetOrderID() (int, error) {
@@ -15,7 +16,7 @@ func (a *AccrualResponse) GetOrderID() (int, error) {
 }
 
 func (a *AccrualResponse) GetAccrual() int {
-	return a.Accrual * 100
+	return common.MoneyFloatToInt(a.Accrual)
 }
 
 func (a *AccrualResponse) GetStatus() string {

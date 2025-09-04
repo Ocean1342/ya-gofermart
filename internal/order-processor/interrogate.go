@@ -6,7 +6,6 @@ import (
 )
 
 func (op *OrderProcessor) interrogateProcess(ctx context.Context) {
-	//вытащить заказы
 	unprocessedOrders, err := op.Storage.GetUnprocessedOrders(ctx, 50)
 	if err != nil {
 		logrus.Errorf("could not get orders. err: %v", err)
