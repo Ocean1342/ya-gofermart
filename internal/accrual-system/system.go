@@ -1,4 +1,4 @@
-package accrualSystem
+package accrualsystem
 
 import (
 	"fmt"
