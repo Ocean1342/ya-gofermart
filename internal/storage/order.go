@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/randallmlough/pgxscan"
 	"strings"
@@ -29,7 +28,7 @@ func (p *PGStorage) GetOrder(ctx context.Context, orderID int) (*Order, error) {
 	row := p.Connection.QueryRow(ctx, sqlQuery, orderID)
 	err := pgxscan.NewScanner(row).Scan(&order.ID, &order.UserID, &order.Status, &order.UploadedAt, &order.UpdatedAt)
 	if err != nil {
-		return nil, fmt.Errorf("scan rows error. err: %s", err)
+		return nil, err
 	}
 	return &order, nil
 }
@@ -45,7 +44,7 @@ func (p *PGStorage) GetOrders(ctx context.Context, userID int) ([]*Order, error)
 		var order Order
 		err = pgxscan.NewScanner(row).Scan(&order.ID, &order.UserID, &order.Status, &order.Accrual, &order.UploadedAt, &order.UpdatedAt)
 		if err != nil {
-			return nil, fmt.Errorf("scan rows error. err: %s", err)
+			return nil, err
 		}
 		orders = append(orders, &order)
 	}
