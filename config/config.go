@@ -30,7 +30,7 @@ func New() *Config {
 		ttl = 24
 	}
 	addr := os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
-	log.Infof("ACCULAR_SYSTEM_ADDRESS: %s", addr)
+	log.Infof("ACCRUAL_SYSTEM_ADDRESS: %s", addr)
 	return &Config{
 		DatabaseURL:       os.Getenv("DATABASE_URI"),
 		RunAddr:           os.Getenv("RUN_ADDRESS"),
