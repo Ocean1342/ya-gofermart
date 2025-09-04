@@ -15,3 +15,6 @@ migration_up:
 migration_drop_all:
 	cd /home/ant/go-work/go-musthave-diploma-tpl/migrations && \
 	$(GOPATH)/bin/goose $(GOOSE_DRIVER) $(GOOSE_DBSTRING) down-to 0
+
+mockgen_accrual_system:
+	$(GOPATH)/bin/mockgen -source=./internal/accrual-system/inteface.go  -destination=./internal/accrual-system/system_mock.go -package=accrual_system

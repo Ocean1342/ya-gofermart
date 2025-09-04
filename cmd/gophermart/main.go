@@ -7,8 +7,10 @@ import (
 	"github.com/pressly/goose/v3"
 	log "github.com/sirupsen/logrus"
 	"gofermart/config"
+	accrual_system "gofermart/internal/accrual-system"
 	"gofermart/internal/api"
 	"gofermart/internal/auth"
+	order_processor "gofermart/internal/order-processor"
 	"gofermart/internal/server"
 	"gofermart/internal/storage"
 	"os"
@@ -28,7 +30,8 @@ func main() {
 	repo := storage.New(ctx, cfg.DatabaseURL)
 	migrate(cfg.DatabaseURL)
 	jwtAuth := auth.New(cfg.SecretKey, cfg.TokenTTL)
-	handler := api.New(repo, jwtAuth)
+	orderProcessor := order_processor.New(accrual_system.New(), repo)
+	handler := api.New(repo, jwtAuth, orderProcessor)
 	server.Init(cfg, handler)
 }
 

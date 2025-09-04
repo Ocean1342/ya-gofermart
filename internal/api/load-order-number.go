@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sirupsen/logrus"
+	order_processor "gofermart/internal/order-processor"
 	"gofermart/internal/storage"
 	"gofermart/pkg/common"
 	"io"
@@ -120,5 +121,10 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 		logger.Infof("user id:%d login:%s saved order id:%d", ctxUser.ID, ctxUser.Login, order.ID)
 	}
 	//TODO: передать заказ на обработку в канал
+	h.OrderProcessor.Queue <- order_processor.OrderQueueItem{
+		OrderID:    orderID,
+		UserID:     ctxUser.ID,
+		RetryTimes: 0,
+	}
 	w.WriteHeader(http.StatusAccepted)
 }
