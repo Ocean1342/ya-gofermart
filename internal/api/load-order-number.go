@@ -8,12 +8,14 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/joeljunstrom/go-luhn"
 	"github.com/sirupsen/logrus"
 	orderprocessor "gofermart/internal/order-processor"
 	"gofermart/internal/storage"
 	"gofermart/pkg/common"
 	"io"
 	"net/http"
+	"strconv"
 )
 
 func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +61,11 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Infof("user id:%d login:%s trying put order id:%d", ctxUser.ID, ctxUser.Login, orderID)
-
+	if !luhn.Valid(strconv.Itoa(orderID)) {
+		logger.Error("luhn err. wrong order number. err")
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
 	existedOrder, err := h.Storage.GetOrder(r.Context(), orderID)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		logger.Errorf("could not get order. err:%s", err)
@@ -120,7 +126,7 @@ func (h *Handler) LoadOrderNumber(w http.ResponseWriter, r *http.Request) {
 
 		logger.Infof("user id:%d login:%s saved order id:%d", ctxUser.ID, ctxUser.Login, order.ID)
 	}
-	//TODO: передать заказ на обработку в канал
+
 	h.OrderProcessor.Queue <- orderprocessor.OrderQueueItem{
 		OrderID:    orderID,
 		UserID:     ctxUser.ID,
