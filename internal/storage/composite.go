@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
+	"strings"
 )
 
 func (p *PGStorage) UpdateOrderAndBalance(ctx context.Context, orderID, userID, accrual int, status string) error {
@@ -13,7 +14,7 @@ func (p *PGStorage) UpdateOrderAndBalance(ctx context.Context, orderID, userID, 
 	}
 	//upd order
 	updOrderSQL := `UPDATE orders SET status=$1, accrual=$2 WHERE id=$3`
-	_, err = tx.Exec(ctx, updOrderSQL, status, accrual, orderID)
+	_, err = tx.Exec(ctx, updOrderSQL, strings.ToUpper(status), accrual, orderID)
 	if err != nil {
 		return err
 	}
@@ -31,4 +32,28 @@ func (p *PGStorage) UpdateOrderAndBalance(ctx context.Context, orderID, userID, 
 		return err
 	}
 	return nil
+}
+
+type UnprocessedOrder struct {
+	OrderID int `db:"id"`
+	UserID  int `db:"user_id"`
+}
+
+func (p *PGStorage) GetUnprocessedOrders(ctx context.Context, limit int) ([]*UnprocessedOrder, error) {
+	orderSQL := `SELECT id, user_id FROM orders WHERE status !='PROCESSED' and status !='INVALID' LIMIT $1`
+	rows, err := p.Connection.Query(ctx, orderSQL, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []*UnprocessedOrder
+	for rows.Next() {
+		var upOrder UnprocessedOrder
+		err = rows.Scan(&upOrder.OrderID, &upOrder.UserID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, &upOrder)
+	}
+	return res, nil
 }

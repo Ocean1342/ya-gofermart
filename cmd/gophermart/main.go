@@ -25,12 +25,15 @@ func init() {
 
 func main() {
 	cfg := config.New()
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(10*time.Second))
-	defer cancel()
+	ctx := context.Background()
 	repo := storage.New(ctx, cfg.DatabaseURL)
 	migrate(cfg.DatabaseURL)
 	jwtAuth := auth.New(cfg.SecretKey, cfg.TokenTTL)
-	orderProcessor := order_processor.New(accrual_system.New(), repo)
+	system := accrual_system.New(cfg.AccrualSystemAddr, "api/orders")
+	orderProcessor := order_processor.New(system, repo, 2*time.Second)
+	go func() {
+		orderProcessor.Process(ctx)
+	}()
 	handler := api.New(repo, jwtAuth, orderProcessor)
 	server.Init(cfg, handler)
 }

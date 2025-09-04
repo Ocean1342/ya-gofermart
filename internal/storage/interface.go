@@ -15,4 +15,5 @@ type Storage interface {
 	GetUserBalanceWithDraw(ctx context.Context, userID int) (*UserBalanceWithDraw, error)
 	GetUserDrawHistory(ctx context.Context, userID int) ([]*UserWithDraw, error)
 	UpdateOrderAndBalance(ctx context.Context, orderID, userID, accrual int, status string) error
+	GetUnprocessedOrders(ctx context.Context, limit int) ([]*UnprocessedOrder, error)
 }

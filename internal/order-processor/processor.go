@@ -25,36 +25,56 @@ type OrderProcessor struct {
 	AccrualService accrual_system.AccrualService
 	Storage        storage.Storage
 	Queue          chan OrderQueueItem
+	tick           time.Duration
 }
 
-func New(service accrual_system.AccrualService, storage storage.Storage) *OrderProcessor {
+func New(service accrual_system.AccrualService, storage storage.Storage, tick time.Duration) *OrderProcessor {
 	ch := make(chan OrderQueueItem, 1_000_000)
 	return &OrderProcessor{
 		AccrualService: service,
 		Storage:        storage,
 		Queue:          ch,
+		tick:           tick,
 	}
 }
 func (op *OrderProcessor) Process(ctx context.Context) {
 	logger := logrus.WithFields(map[string]interface{}{
 		"HANDLER": "OrderProcessor",
 	})
+	queueTicker := time.NewTicker(op.tick)
+	storageInterrogateTicker := time.NewTicker(op.tick + 1)
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Info("order processor stop by ctx")
 			return
+		case <-storageInterrogateTicker.C:
+
+		case <-queueTicker.C:
+			item, ok := <-op.Queue
+			if !ok {
+				logger.Info("queue channel closed")
+				return
+			}
+			if item.OrderID != 0 && item.UserID != 0 {
+				go op.process(ctx, *logger, item)
+			}
 		case item := <-op.Queue:
-			op.process(ctx, *logger, item)
+			go op.process(ctx, *logger, item)
 		}
 	}
 }
 
 func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item OrderQueueItem) {
 	resp := op.AccrualService.OrderProcess(item.OrderID)
+	if resp == nil {
+		logger.Errorf("empty response from accrualService")
+		item.RetryTimes++
+		op.Queue <- item
+		return
+	}
 	switch resp.StatusCode {
 	case 200:
-		//маршалить структуру
 		var acResp AccrualResponse
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil {
@@ -100,5 +120,7 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 		op.Queue <- item
 	default:
 		logger.Errorf("undefined response from accrual system item: %d", item)
+		item.RetryTimes++
+		op.Queue <- item
 	}
 }

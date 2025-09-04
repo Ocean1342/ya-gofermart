@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5"
 	"github.com/randallmlough/pgxscan"
+	"strings"
 	"time"
 )
 
@@ -54,7 +55,7 @@ func (p *PGStorage) GetOrders(ctx context.Context, userID int) ([]*Order, error)
 func (p *PGStorage) SaveOrder(ctx context.Context, orderID, userID int, status string) (*Order, error) {
 	var order Order
 	sqlQuery := "INSERT INTO orders (id,user_id,status,uploaded_at) VALUES ($1,$2,$3,$4) RETURNING id,user_id,status,uploaded_at"
-	row := p.Connection.QueryRow(ctx, sqlQuery, orderID, userID, status, time.Now())
+	row := p.Connection.QueryRow(ctx, sqlQuery, orderID, userID, strings.ToUpper(status), time.Now())
 	err := pgxscan.NewScanner(row).Scan(&order.ID, &order.UserID, &order.Status, &order.UploadedAt)
 	if err != nil {
 		return nil, err

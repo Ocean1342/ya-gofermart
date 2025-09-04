@@ -6,6 +6,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.2
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
+	github.com/hashicorp/go-retryablehttp v0.7.8
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
@@ -17,6 +18,7 @@ require (
 )
 
 require (
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.0 // indirect
 	github.com/jackc/pgconn v1.1.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
