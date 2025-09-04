@@ -49,6 +49,12 @@ func (h *Handler) UserRegister(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf("user login:`%s` already exists", userRegisterRequest.Login)))
 		return
 	}
+	err = h.Storage.CreateUserBalance(r.Context(), user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(fmt.Sprintf("could not create balance. err: %v", err)))
+		return
+	}
 	token, err := h.Auth.CreateToken(user)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

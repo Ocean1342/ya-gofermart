@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5"
 	"github.com/sirupsen/logrus"
@@ -9,11 +10,12 @@ import (
 	"gofermart/pkg/common"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type WithdrawRequest struct {
-	Order int     `json:"order"`
+	Order string  `json:"order"`
 	Sum   float64 `json:"sum"`
 }
 
@@ -53,9 +55,16 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if withdrawRequest.Order <= 0 {
+	intOrder, err := strconv.Atoi(withdrawRequest.Order)
+	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		logger.Errorf("wrong order number: %d", withdrawRequest.Order)
+		logger.Errorf("wrong order number: %s", withdrawRequest.Order)
+		_, err = w.Write([]byte("wrong order number"))
+		return
+	}
+	if intOrder <= 0 {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		logger.Errorf("wrong order number: %s", withdrawRequest.Order)
 		_, err = w.Write([]byte("wrong order number"))
 		if err != nil {
 			logger.Errorf("could not read request body")
@@ -76,7 +85,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	}
 	var balance int
 	err = tx.QueryRow(r.Context(), "SELECT balance FROM user_balance WHERE user_id=$1", ctxUser.ID).Scan(&balance)
-	if err != nil {
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
 		err = tx.Rollback(r.Context())
 		if err != nil {
 			logger.Errorf("user id:`%d` could not rollback transaction. err:%s", ctxUser.ID, err)
@@ -121,7 +130,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	addDrawHistorySQL := `INSERT INTO user_draw_history (user_id, transaction_dt, order_id, draw) VALUES($1,$2,$3,$4)`
-	_, err = tx.Exec(r.Context(), addDrawHistorySQL, ctxUser.ID, time.Now(), withdrawRequest.Order, common.MoneyFloatToInt(withdrawRequest.Sum))
+	_, err = tx.Exec(r.Context(), addDrawHistorySQL, ctxUser.ID, time.Now(), intOrder, common.MoneyFloatToInt(withdrawRequest.Sum))
 	if err != nil {
 		err = tx.Rollback(r.Context())
 		if err != nil {

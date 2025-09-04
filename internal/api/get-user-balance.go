@@ -21,6 +21,7 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		"HANDLER":    "GetUserBalance",
 		"REQUEST_ID": r.Context().Value(middleware.RequestIDKey),
 	})
+	w.Header().Set("Content-Type", "application/json")
 	ctxUser, ok := (r.Context().Value(common.CtxUser)).(*storage.User)
 	if !ok || ctxUser == nil {
 		logger.Errorf("could not extract user from context")

@@ -40,13 +40,22 @@ func (p *PGStorage) GetUserByLogin(ctx context.Context, login string) (*User, er
 
 func (p *PGStorage) CreateUser(ctx context.Context, login string, password string) (*User, error) {
 	var user User
-	sqlQuery := "INSERT INTO users (login,password) VALUES($1,$2) RETURNING id, login, password"
+	sqlQuery := `INSERT INTO users (login,password) VALUES($1,$2) RETURNING id, login, password`
 	row := p.Connection.QueryRow(ctx, sqlQuery, login, password)
 	err := pgxscan.NewScanner(row).Scan(&user.ID, &user.Login, &user.Password)
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (p *PGStorage) CreateUserBalance(ctx context.Context, userID int) error {
+	sqlQuery := `INSERT INTO user_balance (user_id, balance, updated_at) VALUES($1,$2,$3)`
+	_, err := p.Connection.Exec(ctx, sqlQuery, userID, 0, time.Now())
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (p *PGStorage) GetUserBalanceWithDraw(ctx context.Context, userID int) (*UserBalanceWithDraw, error) {

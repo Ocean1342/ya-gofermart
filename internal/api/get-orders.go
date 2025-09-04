@@ -7,11 +7,12 @@ import (
 	"gofermart/internal/storage"
 	"gofermart/pkg/common"
 	"net/http"
+	"strconv"
 	"time"
 )
 
-type Order struct {
-	ID         int    `json:"number"`
+type OrderResponse struct {
+	ID         string `json:"number"`
 	UserID     int    `json:"-"`
 	Status     string `json:"status"`
 	Accrual    int    `json:"accrual,omitempty"`
@@ -61,11 +62,11 @@ func (h *Handler) GetOrders(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func hydrate(orders []*storage.Order) []*Order {
-	res := make([]*Order, len(orders))
+func hydrate(orders []*storage.Order) []*OrderResponse {
+	res := make([]*OrderResponse, len(orders))
 	for i, o := range orders {
-		hydratedOrder := &Order{}
-		hydratedOrder.ID = o.ID
+		hydratedOrder := &OrderResponse{}
+		hydratedOrder.ID = strconv.Itoa(o.ID)
 		hydratedOrder.UserID = o.UserID
 		hydratedOrder.Status = o.Status
 		hydratedOrder.Accrual = o.Accrual
