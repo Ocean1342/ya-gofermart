@@ -1,4 +1,4 @@
-package order_processor
+package orderProcessor
 
 import (
 	"context"

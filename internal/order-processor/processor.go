@@ -1,11 +1,11 @@
-package order_processor
+package orderProcessor
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 	"github.com/sirupsen/logrus"
-	accrual_system "gofermart/internal/accrual-system"
+	accrualsystem "gofermart/internal/accrual-system"
 	"gofermart/internal/storage"
 	"io"
 	"time"
@@ -22,13 +22,13 @@ type OrderQueueItem struct {
 }
 
 type OrderProcessor struct {
-	AccrualService accrual_system.AccrualService
+	AccrualService accrualsystem.AccrualService
 	Storage        storage.Storage
 	Queue          chan OrderQueueItem
 	tick           time.Duration
 }
 
-func New(service accrual_system.AccrualService, storage storage.Storage, tick time.Duration) *OrderProcessor {
+func New(service accrualsystem.AccrualService, storage storage.Storage, tick time.Duration) *OrderProcessor {
 	ch := make(chan OrderQueueItem, 1_000_000)
 	return &OrderProcessor{
 		AccrualService: service,
@@ -46,7 +46,7 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			logger.Info("order processor stop by ctx")
+			logger.Info("Order processor stop by ctx")
 			return
 		case <-storageInterrogateTicker.C:
 
@@ -92,7 +92,7 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 		}
 		orderID, err := acResp.GetOrderID()
 		if err != nil {
-			logger.Errorf("could not convert order id")
+			logger.Errorf("could not convert Order id")
 			item.RetryTimes++
 			op.Queue <- item
 			return
@@ -106,9 +106,9 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 	case 204:
 		bytes, err := io.ReadAll(resp.Body)
 		if err != nil && !errors.Is(err, io.EOF) {
-			logger.Errorf("recived 204. item %s read body err:%s", item, err)
+			logger.Errorf("recived 204. orderID %d read body err:%s", item.OrderID, err)
 		}
-		logger.Errorf("recived 204. item %s response body: %s", item, string(bytes))
+		logger.Errorf("recived 204. orderID %d response body: %s", item.OrderID, string(bytes))
 		item.RetryTimes++
 		op.Queue <- item
 	case 429:
@@ -116,10 +116,10 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 		time.Sleep(60 * time.Second)
 		op.Queue <- item
 	case 500:
-		logger.Errorf("accrual 500")
+		logger.Errorf("Accrual 500")
 		op.Queue <- item
 	default:
-		logger.Errorf("undefined response from accrual system item: %d", item)
+		logger.Errorf("undefined response from Accrual system item: %d", item)
 		item.RetryTimes++
 		op.Queue <- item
 	}

@@ -1,23 +1,23 @@
-package order_processor
+package orderProcessor
 
 import (
 	"strconv"
 )
 
 type AccrualResponse struct {
-	order   string
-	status  string
-	accrual int
+	Order   string
+	Status  string
+	Accrual int
 }
 
 func (a *AccrualResponse) GetOrderID() (int, error) {
-	return strconv.Atoi(a.order)
+	return strconv.Atoi(a.Order)
 }
 
 func (a *AccrualResponse) GetAccrual() int {
-	return a.accrual * 100
+	return a.Accrual * 100
 }
 
 func (a *AccrualResponse) GetStatus() string {
-	return a.status
+	return a.Status
 }

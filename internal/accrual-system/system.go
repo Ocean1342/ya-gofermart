@@ -1,4 +1,4 @@
-package accrual_system
+package accrualSystem
 
 import (
 	"fmt"
@@ -27,8 +27,8 @@ func New(url, path string) *System {
 func (s *System) OrderProcess(orderID int) *http.Response {
 	l := logrus.WithField("HANDLER", "AccrualSystem")
 	l.Infof("start request orderID:%d", orderID)
-	reqUrl := fmt.Sprintf("%s/%s/%d", s.url, s.path, orderID)
-	resp, err := s.client.Get(reqUrl)
+	reqURL := fmt.Sprintf("%s/%s/%d", s.url, s.path, orderID)
+	resp, err := s.client.Get(reqURL)
 	if err != nil {
 		l.Errorf("could not send request to accrual system. err:%s", err)
 		return nil
