@@ -59,19 +59,19 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var withDraw int64
-	var withDrawFloat float64
-	if userBalance.WithDraw.Valid {
-		withDraw = userBalance.WithDraw.Int64
-		withDrawFloat = common.MoneyIntToFloat(int(withDraw))
-	} else {
-		logger.Errorf("userBalance.WithDraw is not valid")
-	}
+	/*	var withDraw int64
+		var withDrawFloat float64
+		if userBalance.WithDraw.Valid {
+			withDraw = userBalance.WithDraw.Int64
+			withDrawFloat = common.MoneyIntToFloat(int(withDraw))
+		} else {
+			logger.Errorf("userBalance.WithDraw is not valid")
+		}*/
 	userBalanceWithDraw := UserBalanceResponse{
 		Current:  common.MoneyIntToFloat(userBalance.Balance),
-		Withdraw: withDrawFloat,
+		Withdraw: common.MoneyIntToFloat(userBalance.WithDraw),
 	}
-	logger.Infof("user id:%d balance: %f withdraw: %f", ctxUser.ID, common.MoneyIntToFloat(userBalance.Balance), withDrawFloat)
+	logger.Infof("user id:%d balance: %f withdraw: %f", ctxUser.ID, userBalanceWithDraw.Current, userBalanceWithDraw.Withdraw)
 
 	bytes, err := json.Marshal(userBalanceWithDraw)
 	if err != nil {

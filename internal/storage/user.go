@@ -15,9 +15,9 @@ type User struct {
 }
 
 type UserBalanceWithDraw struct {
-	UserID   int           `db:"user_id"`
-	Balance  int           `db:"balance"`
-	WithDraw sql.NullInt64 `db:"draw"`
+	UserID   int `db:"user_id"`
+	Balance  int `db:"balance"`
+	WithDraw int `db:"draw"`
 }
 
 type UserWithDraw struct {
