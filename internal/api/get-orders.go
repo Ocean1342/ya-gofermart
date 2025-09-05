@@ -12,12 +12,12 @@ import (
 )
 
 type OrderResponse struct {
-	ID         string `json:"number"`
-	UserID     int    `json:"-"`
-	Status     string `json:"status"`
-	Accrual    int    `json:"accrual,omitempty"`
-	UploadedAt string `json:"uploaded_at"`
-	UpdatedAt  string `json:"updated_at"`
+	ID         string  `json:"number"`
+	UserID     int     `json:"-"`
+	Status     string  `json:"status"`
+	Accrual    float64 `json:"accrual,omitempty"`
+	UploadedAt string  `json:"uploaded_at"`
+	UpdatedAt  string  `json:"updated_at"`
 }
 
 func (h *Handler) GetOrders(w http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ func hydrate(orders []*storage.Order) []*OrderResponse {
 		hydratedOrder.ID = strconv.Itoa(o.ID)
 		hydratedOrder.UserID = o.UserID
 		hydratedOrder.Status = o.Status
-		hydratedOrder.Accrual = o.Accrual
+		hydratedOrder.Accrual = common.MoneyIntToFloat(o.Accrual)
 		hydratedOrder.UploadedAt = o.UploadedAt.Format(time.RFC3339)
 		hydratedOrder.UpdatedAt = o.UpdatedAt.Time.Format(time.RFC3339)
 		res[i] = hydratedOrder
