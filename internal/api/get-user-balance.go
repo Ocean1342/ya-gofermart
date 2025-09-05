@@ -51,7 +51,6 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-
 		logger.Errorf("user id:`%d` error get balanceWithDraw: %s", ctxUser.ID, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte("could not get balanceWithDraw"))
@@ -65,12 +64,15 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 	if userBalance.WithDraw.Valid {
 		withDraw = userBalance.WithDraw.Int64
 		withDrawFloat = common.MoneyIntToFloat(int(withDraw))
+	} else {
+		logger.Errorf("userBalance.WithDraw is not valid")
 	}
-
 	userBalanceWithDraw := UserBalanceResponse{
 		Current:  common.MoneyIntToFloat(userBalance.Balance),
 		Withdraw: withDrawFloat,
 	}
+	logger.Infof("user id:%d balance: %f withdraw: %f", ctxUser.ID, common.MoneyIntToFloat(userBalance.Balance), withDrawFloat)
+
 	bytes, err := json.Marshal(userBalanceWithDraw)
 	if err != nil {
 		logger.Errorf("could not marshal data")

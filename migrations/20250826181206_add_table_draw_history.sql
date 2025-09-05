@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS user_draw_history
     user_id        int NOT NULL,
     transaction_dt TIMESTAMP,
     order_id       bigint NOT NULL,
-    draw           int
+    draw           bigint
 );
 
 

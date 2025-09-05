@@ -2,10 +2,10 @@
 CREATE table IF NOT EXISTS orders
 (
     id          bigint UNIQUE NOT NULL,
-    user_id     int        NOT NULL,
-    status      text       NOT NULL,
-    accrual     int        NOT NULL DEFAULT 0,
-    uploaded_at TIMESTAMP  NOT NULL,
+    user_id     int           NOT NULL,
+    status      text          NOT NULL,
+    accrual     bigint        NOT NULL DEFAULT 0,
+    uploaded_at TIMESTAMP     NOT NULL,
     updated_at  TIMESTAMP
 );
 
