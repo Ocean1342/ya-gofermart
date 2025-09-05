@@ -7,12 +7,13 @@ import (
 	"gofermart/internal/storage"
 	"gofermart/pkg/common"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 type Draw struct {
-	Order       int       `json:"order"`
-	Sum         int       `json:"sum"`
+	Order       string    `json:"order"`
+	Sum         float64   `json:"sum"`
 	ProcessedAt time.Time `json:"processed_at"`
 }
 type DrawsHistory []Draw
@@ -48,11 +49,12 @@ func (h *Handler) GetUserWithDrawInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	res := make(DrawsHistory, len(history))
-	for i, h := range history {
+	for i, hItem := range history {
+		value := hItem.WithDraw.Int64
 		res[i] = Draw{
-			Order:       h.OrderID,
-			Sum:         int(h.WithDraw.Int64),
-			ProcessedAt: h.TransactionDT,
+			Order:       strconv.Itoa(hItem.OrderID),
+			Sum:         common.MoneyIntToFloat(int(value)),
+			ProcessedAt: hItem.TransactionDT,
 		}
 	}
 	bytes, err := json.Marshal(res)

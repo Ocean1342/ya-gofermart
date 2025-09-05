@@ -36,7 +36,7 @@ func (h *Handler) Authenticate(next http.Handler) http.Handler {
 			w.Write([]byte("user not found"))
 			return
 		}
-		logger.Infof("auth user login:`%s`", user.Login)
+		logger.Infof("auth user login: %s id: %d", user.Login, user.ID)
 		r = r.WithContext(context.WithValue(r.Context(), common.CtxUser, user))
 		next.ServeHTTP(w, r)
 	}

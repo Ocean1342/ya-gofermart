@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
@@ -30,7 +31,14 @@ func New() *Config {
 		ttl = 24
 	}
 	addr := os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
-	log.Infof("ACCRUAL_SYSTEM_ADDRESS: %s", addr)
+	addrUrl, err := url.Parse(addr)
+	if err != nil {
+		log.Fatalf("wrong accrual system address: %s. err: %v", addr, err)
+	}
+	if addrUrl.Scheme == "" || addrUrl.Host == "" {
+		log.Fatalf("wrong accrual system address: %s. expected: http://system.example:8080", addrUrl.String())
+	}
+	log.Infof("accrual system address: %s", addr)
 	return &Config{
 		DatabaseURL:       os.Getenv("DATABASE_URI"),
 		RunAddr:           os.Getenv("RUN_ADDRESS"),
