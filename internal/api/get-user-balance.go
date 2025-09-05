@@ -60,14 +60,11 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	var withDraw int
+	var withDraw int64
 	var withDrawFloat float64
 	if userBalance.WithDraw.Valid {
-		err = userBalance.WithDraw.Scan(withDraw)
-		if err != nil {
-			logger.Errorf("could not scan user withdraw")
-		}
-		withDrawFloat = common.MoneyIntToFloat(withDraw)
+		withDraw = userBalance.WithDraw.Int64
+		withDrawFloat = common.MoneyIntToFloat(int(withDraw))
 	}
 
 	userBalanceWithDraw := UserBalanceResponse{

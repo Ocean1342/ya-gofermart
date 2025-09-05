@@ -60,9 +60,10 @@ func (p *PGStorage) CreateUserBalance(ctx context.Context, userID int) error {
 
 func (p *PGStorage) GetUserBalanceWithDraw(ctx context.Context, userID int) (*UserBalanceWithDraw, error) {
 	var user UserBalanceWithDraw
-	sqlQuery := `SELECT  ub.balance, SUM(udh.draw)
+	sqlQuery := `SELECT  ub.balance, SUM(udh.draw) as draw
 			FROM user_balance AS ub
-         	LEFT JOIN user_draw_history AS udh ON ub.user_id = udh.user_id
+         	LEFT JOIN user_draw_history AS udh 
+         	ON ub.user_id = udh.user_id
 			WHERE ub.user_id = $1
 			GROUP BY ub.balance`
 	row := p.Connection.QueryRow(ctx, sqlQuery, userID)
