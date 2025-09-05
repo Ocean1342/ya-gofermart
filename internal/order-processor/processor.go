@@ -97,8 +97,10 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 			op.Queue <- item
 			return
 		}
+		logger.Infof("user id %d get raw accrual: %f counted accrual: %d", item.UserID, acResp.Accrual, acResp.GetAccrual())
 		err = op.Storage.UpdateOrderAndBalance(ctx, orderID, item.UserID, acResp.GetAccrual(), acResp.GetStatus())
 		if err != nil {
+			logger.Errorf("UpdateOrderAndBalance err: %v", err)
 			item.RetryTimes++
 			op.Queue <- item
 			return
