@@ -2,6 +2,7 @@ package orderprocessor
 
 import (
 	"gofermart/pkg/common"
+	"math"
 	"strconv"
 )
 
@@ -16,7 +17,8 @@ func (a *AccrualResponse) GetOrderID() (int, error) {
 }
 
 func (a *AccrualResponse) GetAccrual() int {
-	return common.MoneyFloatToInt(a.Accrual)
+	round := math.Round(a.Accrual*100) / 100
+	return common.MoneyFloatToInt(round)
 }
 
 func (a *AccrualResponse) GetStatus() string {
