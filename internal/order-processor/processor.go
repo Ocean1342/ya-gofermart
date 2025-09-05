@@ -49,7 +49,7 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 			logger.Info("Order processor stop by ctx")
 			return
 		case <-storageInterrogateTicker.C:
-			go op.interrogateProcess(ctx)
+			//go op.interrogateProcess(ctx)
 		case <-queueTicker.C:
 			item, ok := <-op.Queue
 			if !ok {
