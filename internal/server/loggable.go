@@ -54,6 +54,9 @@ func loggable(next http.Handler) http.Handler {
 		logrus.Debugf("REQUEST: REQUEST-ID:`%s`.url:`%s`. method:`%s` body: `%s`. headers: `%s`",
 			reqID, reqCopy.RequestURI, reqCopy.Method, string(bodyBytes), reqCopy.Header)
 		logRW := &logResponseWriter{innerWriter: w, reqID: reqID}
+		if r.Header.Get("Authorization") != "" {
+			w.Header().Set("Authorization", r.Header.Get("Authorization"))
+		}
 		next.ServeHTTP(logRW, r)
 	}
 	return http.HandlerFunc(fn)

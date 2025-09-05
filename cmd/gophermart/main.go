@@ -30,7 +30,7 @@ func main() {
 	migrate(cfg.DatabaseURL)
 	jwtAuth := auth.New(cfg.SecretKey, cfg.TokenTTL)
 	system := accrualsystem.New(cfg.AccrualSystemAddr, "api/orders")
-	orderProcessor := orderprocessor.New(system, repo, 2*time.Second)
+	orderProcessor := orderprocessor.New(system, repo, 60*time.Second)
 	go func() {
 		orderProcessor.Process(ctx)
 	}()
