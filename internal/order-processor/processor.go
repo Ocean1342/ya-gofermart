@@ -113,7 +113,7 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 		logger.Errorf("recived 204. orderID %d response body: %s", item.OrderID, string(bytes))
 		err = op.Storage.UpdateOrderAndBalance(ctx, item.OrderID, item.UserID, 0, "INVALID")
 		if err != nil {
-			logger.Errorf("could not change status for order id:%d", item.OrderID)
+			logger.Errorf("could not change status for order id:%d err:%v", item.OrderID, err)
 		}
 	case 429:
 		logger.Errorf("too many requests.sleeps for 60 sec")
