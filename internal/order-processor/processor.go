@@ -42,14 +42,14 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 		"HANDLER": "OrderProcessor",
 	})
 	queueTicker := time.NewTicker(op.tick)
-	storageInterrogateTicker := time.NewTicker(op.tick + 1)
+	//storageInterrogateTicker := time.NewTicker(op.tick + 1)
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Info("Order processor stop by ctx")
 			return
-		case <-storageInterrogateTicker.C:
-			//go op.interrogateProcess(ctx)
+		//case <-storageInterrogateTicker.C:
+		//go op.interrogateProcess(ctx)
 		case <-queueTicker.C:
 			item, ok := <-op.Queue
 			if !ok {

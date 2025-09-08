@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/sirupsen/logrus"
+	"gofermart/utis"
+	"io"
 	"net/http"
 	"time"
 )
@@ -33,7 +35,9 @@ func (s *System) OrderProcess(orderID int) *http.Response {
 		l.Errorf("could not send request to accrual system. err:%s", err)
 		return nil
 	}
-	l.Infof("successfull sended request")
+	respCopy, _ := utis.CopyHTTPResponse(resp)
+	respCopyBody, _ := io.ReadAll(respCopy.Body)
+	l.Infof("successfull sended request for orderID: %d. resp status:%d body:%s", orderID, respCopy.StatusCode, respCopyBody)
 	return resp
 }
 

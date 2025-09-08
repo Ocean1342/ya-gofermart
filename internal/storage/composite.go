@@ -31,6 +31,7 @@ func (p *PGStorage) UpdateOrderAndBalance(ctx context.Context, orderID, userID, 
 	//upd balance
 	_, err = tx.Exec(ctx, `UPDATE user_balance SET balance = $1 WHERE user_id=$2`, newBalance, userID)
 	if err != nil {
+		_ = tx.Rollback(ctx)
 		return err
 	}
 	err = tx.Commit(ctx)
