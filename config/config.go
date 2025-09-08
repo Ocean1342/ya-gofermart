@@ -31,12 +31,12 @@ func New() *Config {
 		ttl = 24
 	}
 	addr := os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
-	addrUrl, err := url.Parse(addr)
+	addrURL, err := url.Parse(addr)
 	if err != nil {
 		log.Fatalf("wrong accrual system address: %s. err: %v", addr, err)
 	}
-	if addrUrl.Scheme == "" || addrUrl.Host == "" {
-		log.Fatalf("wrong accrual system address: %s. expected: http://system.example:8080", addrUrl.String())
+	if addrURL.Scheme == "" || addrURL.Host == "" {
+		log.Fatalf("wrong accrual system address: %s. expected: http://system.example:8080", addrURL.String())
 	}
 	log.Infof("accrual system address: %s", addr)
 	return &Config{

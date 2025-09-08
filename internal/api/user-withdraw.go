@@ -139,7 +139,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	}
 	addDrawHistorySQL := `INSERT INTO user_draw_history (user_id, transaction_dt, order_id, draw) VALUES($1,$2,$3,$4)`
 	logger.Infof("sql:%s userid: %d time%s orderOD:%d money:%d", addDrawHistorySQL, ctxUser.ID, time.Now(), intOrder, common.MoneyFloatToInt(withdrawRequest.Sum))
-	_, err = tx.Exec(r.Context(), addDrawHistorySQL, ctxUser.ID, time.Now(), intOrder, common.MoneyFloatToInt(withdrawRequest.Sum))
+	_, err = tx.Exec(ctxTx, addDrawHistorySQL, ctxUser.ID, time.Now(), intOrder, common.MoneyFloatToInt(withdrawRequest.Sum))
 	if err != nil {
 		logger.Errorf("user id:`%d` could not update draw history. err:%v", ctxUser.ID, err)
 		err = tx.Rollback(ctxTx)
