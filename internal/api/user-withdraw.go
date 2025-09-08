@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5/middleware"
@@ -71,9 +72,15 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	//получить баланс в транзакции, если хватает, то списать, если не хватает, то откатиться
-	tx, err := h.Storage.BeginTx(r.Context(), pgx.TxOptions{})
+	ctxTx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	defer cancel()
+	tx, err := h.Storage.BeginTx(ctxTx, pgx.TxOptions{})
+	defer func() {
+		err = tx.Rollback(ctxTx)
+		if err != nil {
+			logger.Errorf("user id:`%d` could not rollback transaction. err: %v", ctxUser.ID, err)
+		}
+	}()
 	if err != nil {
 		logger.Errorf("user id:`%d` could not start transaction: %s", ctxUser.ID, err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -84,12 +91,12 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var balance int
-	err = tx.QueryRow(r.Context(), "SELECT balance FROM user_balance WHERE user_id=$1", ctxUser.ID).Scan(&balance)
+	err = tx.QueryRow(ctxTx, "SELECT balance FROM user_balance WHERE user_id=$1", ctxUser.ID).Scan(&balance)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		/*err = tx.Rollback(r.Context())
+		err = tx.Rollback(ctxTx)
 		if err != nil {
 			logger.Errorf("user id:`%d` could not rollback transaction. err: %v", ctxUser.ID, err)
-		}*/
+		}
 		logger.Errorf("user id:`%d` could not get balance: %s", ctxUser.ID, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte("could not get balance"))
@@ -103,10 +110,10 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	newBalance := balance - requestedDraw
 	logger.Infof("user id:`%d` try sasve new balance: %d", ctxUser.ID, newBalance)
 	if newBalance < 0 {
-		/*err = tx.Rollback(r.Context())
+		err = tx.Rollback(ctxTx)
 		if err != nil {
 			logger.Errorf("user id:`%d` could not rollback transaction. err: %v", ctxUser.ID, err)
-		}*/
+		}
 		logger.Errorf("user id:`%d` could not draw. current balance: %d,withdraw:%d", ctxUser.ID, balance, requestedDraw)
 		w.WriteHeader(http.StatusPaymentRequired)
 		_, err = w.Write([]byte("could not withdraw"))
@@ -118,10 +125,10 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	updateBalanceSQL := `UPDATE user_balance SET balance = $1 WHERE user_id=$2`
 	_, err = tx.Exec(r.Context(), updateBalanceSQL, newBalance, ctxUser.ID)
 	if err != nil {
-		/*err = tx.Rollback(r.Context())
+		err = tx.Rollback(ctxTx)
 		if err != nil {
 			logger.Errorf("user id:`%d` could not rollback transaction. err: %v", ctxUser.ID, err)
-		}*/
+		}
 		logger.Errorf("user id:`%d` could not update balance. err: %v", ctxUser.ID, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte("could not update balance"))
@@ -135,10 +142,10 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	_, err = tx.Exec(r.Context(), addDrawHistorySQL, ctxUser.ID, time.Now(), intOrder, common.MoneyFloatToInt(withdrawRequest.Sum))
 	if err != nil {
 		logger.Errorf("user id:`%d` could not update draw history. err:%v", ctxUser.ID, err)
-		/*err = tx.Rollback(r.Context())
+		err = tx.Rollback(ctxTx)
 		if err != nil {
 			logger.Errorf("user id:`%d` could not rollback transaction. err: %v", ctxUser.ID, err)
-		}*/
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		_, err = w.Write([]byte("could not update draw history"))
 		if err != nil {
@@ -146,7 +153,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	/*err = tx.Commit(r.Context())
+	err = tx.Commit(ctxTx)
 	if err != nil {
 		logger.Errorf("user id:`%d` could not commit tx. err: %v", ctxUser.ID, err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -155,7 +162,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 			logger.Errorf("could not write data to response")
 		}
 		return
-	}*/
+	}
 
 	w.WriteHeader(http.StatusOK)
 }
