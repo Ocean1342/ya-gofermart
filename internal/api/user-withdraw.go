@@ -99,8 +99,9 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	requestedDraw := common.MoneyFloatToInt(withdrawRequest.Sum)
-	logger.Errorf("user id:`%d` try draw current balance: %d,withdraw:%d", ctxUser.ID, balance, requestedDraw)
+	logger.Infof("user id:`%d` try draw current balance: %d, withdraw:%d", ctxUser.ID, balance, requestedDraw)
 	newBalance := balance - requestedDraw
+	logger.Infof("user id:`%d` try sasve new balance: %d", ctxUser.ID, newBalance)
 	if newBalance < 0 {
 		err = tx.Rollback(r.Context())
 		if err != nil {

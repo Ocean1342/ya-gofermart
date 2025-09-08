@@ -9,12 +9,11 @@ import (
 	"gofermart/internal/storage"
 	"gofermart/pkg/common"
 	"net/http"
-	"time"
 )
 
 type UserBalanceResponse struct {
 	Current  float64 `json:"current"`
-	Withdraw float64 `json:"withdraw"`
+	Withdraw float64 `json:"withdrawn"`
 }
 
 func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
@@ -22,8 +21,6 @@ func (h *Handler) GetUserBalance(w http.ResponseWriter, r *http.Request) {
 		"HANDLER":    "GetUserBalance",
 		"REQUEST_ID": r.Context().Value(middleware.RequestIDKey),
 	})
-
-	time.Sleep(1 * time.Second)
 	w.Header().Set("Content-Type", "application/json")
 	ctxUser, ok := (r.Context().Value(common.CtxUser)).(*storage.User)
 	if !ok || ctxUser == nil {
