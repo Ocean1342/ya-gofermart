@@ -57,9 +57,11 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 				return
 			}
 			if item.OrderID != 0 && item.UserID != 0 {
+				logger.Infof("ticker recieved item orderID:%d, userID: %d retrytimes: %d", item.OrderID, item.UserID, item.RetryTimes)
 				op.process(ctx, *logger, item)
 			}
 		case item := <-op.Queue:
+			logger.Infof("recieved item orderID:%d, userID: %d retrytimes: %d", item.OrderID, item.UserID, item.RetryTimes)
 			op.process(ctx, *logger, item)
 		}
 	}
