@@ -57,10 +57,10 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 				return
 			}
 			if item.OrderID != 0 && item.UserID != 0 {
-				go op.process(ctx, *logger, item)
+				op.process(ctx, *logger, item)
 			}
 		case item := <-op.Queue:
-			go op.process(ctx, *logger, item)
+			op.process(ctx, *logger, item)
 		}
 	}
 }
