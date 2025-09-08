@@ -41,7 +41,7 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 	logger := logrus.WithFields(map[string]interface{}{
 		"HANDLER": "OrderProcessor",
 	})
-	queueTicker := time.NewTicker(op.tick)
+	//queueTicker := time.NewTicker(op.tick)
 	//storageInterrogateTicker := time.NewTicker(op.tick + 1)
 	for {
 		select {
@@ -50,16 +50,16 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 			return
 		//case <-storageInterrogateTicker.C:
 		//go op.interrogateProcess(ctx)
-		case <-queueTicker.C:
-			item, ok := <-op.Queue
-			if !ok {
-				logger.Info("queue channel closed")
-				return
-			}
-			if item.OrderID != 0 && item.UserID != 0 {
-				logger.Infof("ticker recieved item orderID:%d, userID: %d retrytimes: %d", item.OrderID, item.UserID, item.RetryTimes)
-				op.process(ctx, *logger, item)
-			}
+		/*		case <-queueTicker.C:
+				item, ok := <-op.Queue
+				if !ok {
+					logger.Info("queue channel closed")
+					return
+				}
+				if item.OrderID != 0 && item.UserID != 0 {
+					logger.Infof("ticker recieved item orderID:%d, userID: %d retrytimes: %d", item.OrderID, item.UserID, item.RetryTimes)
+					op.process(ctx, *logger, item)
+				}*/
 		case item := <-op.Queue:
 			logger.Infof("recieved item orderID:%d, userID: %d retrytimes: %d", item.OrderID, item.UserID, item.RetryTimes)
 			op.process(ctx, *logger, item)
