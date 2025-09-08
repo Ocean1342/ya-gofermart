@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
+	"github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -16,7 +17,10 @@ func (p *PGStorage) UpdateOrderAndBalance(ctx context.Context, orderID, userID, 
 	updOrderSQL := `UPDATE orders SET status=$1, accrual=$2 WHERE id=$3`
 	_, err = tx.Exec(ctx, updOrderSQL, strings.ToUpper(status), accrual, orderID)
 	if err != nil {
-		_ = tx.Rollback(ctx)
+		errRollback := tx.Rollback(ctx)
+		if errRollback != nil {
+			logrus.Warnf("UPDATE orders could not rollback tx. err: %v", errRollback)
+		}
 		return err
 	}
 	//get balance
@@ -24,19 +28,28 @@ func (p *PGStorage) UpdateOrderAndBalance(ctx context.Context, orderID, userID, 
 	row := tx.QueryRow(ctx, "SELECT balance FROM user_balance WHERE user_id=$1", userID)
 	err = row.Scan(&balance)
 	if err != nil {
-		_ = tx.Rollback(ctx)
+		errRollback := tx.Rollback(ctx)
+		if errRollback != nil {
+			logrus.Warnf("SELECT balance could not rollback tx. err: %v", errRollback)
+		}
 		return err
 	}
 	newBalance := balance + accrual
 	//upd balance
 	_, err = tx.Exec(ctx, `UPDATE user_balance SET balance = $1 WHERE user_id=$2`, newBalance, userID)
 	if err != nil {
-		_ = tx.Rollback(ctx)
+		errRollback := tx.Rollback(ctx)
+		if errRollback != nil {
+			logrus.Warnf("UPDATE user_balance could not rollback tx. err: %v", errRollback)
+		}
 		return err
 	}
 	err = tx.Commit(ctx)
 	if err != nil {
-		_ = tx.Rollback(ctx)
+		errRollback := tx.Rollback(ctx)
+		if errRollback != nil {
+			logrus.Warnf("commit could not rollback tx. err: %v", errRollback)
+		}
 		return err
 	}
 	return nil
