@@ -72,6 +72,12 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 		op.Queue <- item
 		return
 	}
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			logger.Errorf("could not close response body. err: %v", err)
+		}
+	}()
 	switch resp.StatusCode {
 	case 200:
 		err := op.StatusOkHandle(ctx, logger, resp, item)
