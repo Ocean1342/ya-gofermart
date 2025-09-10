@@ -11,6 +11,7 @@ import (
 	"gofermart/internal/migrator"
 	orderprocessor "gofermart/internal/order-processor"
 	"gofermart/internal/server"
+	"gofermart/internal/service"
 	"gofermart/internal/storage"
 	"os"
 	"time"
@@ -35,6 +36,6 @@ func main() {
 	go func() {
 		orderProcessor.Process(ctx)
 	}()
-	handler := api.New(repo, auth.New(cfg.SecretKey, cfg.TokenTTL), orderProcessor)
+	handler := api.New(repo, auth.New(cfg.SecretKey, cfg.TokenTTL), orderProcessor, service.New(repo))
 	server.Init(cfg, handler)
 }
