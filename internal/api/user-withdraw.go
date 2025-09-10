@@ -51,7 +51,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 	}
 	err = h.Service.UserWithDraw(r, ctxUser, withdrawRequest)
 	if err != nil {
-		if errors.Is(err, service.InternalServerError) {
+		if errors.Is(err, service.ErrInternalServer) {
 			logger.Errorf("service error: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			_, err = w.Write([]byte(fmt.Sprintf("could not withdraw: %s", err.Error())))
@@ -59,7 +59,7 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 				logger.Errorf("could not write data to response")
 			}
 			return
-		} else if errors.Is(err, service.PaymentRequiredError) {
+		} else if errors.Is(err, service.ErrPaymentRequired) {
 			logger.Errorf("service error: %s", err)
 			w.WriteHeader(http.StatusPaymentRequired)
 			_, err = w.Write([]byte(fmt.Sprintf("could not withdraw: %s", err.Error())))
@@ -67,10 +67,13 @@ func (h *Handler) UserWithdraw(w http.ResponseWriter, r *http.Request) {
 				logger.Errorf("could not write data to response")
 			}
 			return
-		} else if errors.Is(err, service.StatusUnprocessableEntityError) {
+		} else if errors.Is(err, service.ErrStatusUnprocessableEntity) {
 			logger.Errorf("service error: %s", err)
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			_, err = w.Write([]byte(fmt.Sprintf("could not withdraw: %s", err.Error())))
+			if err != nil {
+				logger.Errorf("could not write data to response")
+			}
 			return
 		} else {
 			w.WriteHeader(http.StatusInternalServerError)

@@ -10,9 +10,9 @@ type Service struct {
 }
 
 var (
-	InternalServerError            = errors.New("internal server")
-	PaymentRequiredError           = errors.New("payment required")
-	StatusUnprocessableEntityError = errors.New("status unprocessable entity")
+	ErrInternalServer            = errors.New("internal server")
+	ErrPaymentRequired           = errors.New("payment required")
+	ErrStatusUnprocessableEntity = errors.New("status unprocessable entity")
 )
 
 func New(storage storage.Storage) *Service {
