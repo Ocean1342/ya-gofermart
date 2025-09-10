@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/pressly/goose/v3"
 	log "github.com/sirupsen/logrus"
 	"gofermart/config"
 	accrualsystem "gofermart/internal/accrual-system"
 	"gofermart/internal/api"
 	"gofermart/internal/auth"
+	"gofermart/internal/migrator"
 	orderprocessor "gofermart/internal/order-processor"
 	"gofermart/internal/server"
 	"gofermart/internal/storage"
@@ -27,32 +26,15 @@ func main() {
 	cfg := config.New()
 	ctx := context.Background()
 	repo := storage.New(ctx, cfg.DatabaseURL)
-	migrate(cfg.DatabaseURL)
-	jwtAuth := auth.New(cfg.SecretKey, cfg.TokenTTL)
+	err := migrator.Migrate(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("could not migrate database: %v", err)
+	}
 	system := accrualsystem.New(cfg.AccrualSystemAddr, "api/orders")
 	orderProcessor := orderprocessor.New(system, repo, 60*time.Second)
 	go func() {
 		orderProcessor.Process(ctx)
 	}()
-	handler := api.New(repo, jwtAuth, orderProcessor)
+	handler := api.New(repo, auth.New(cfg.SecretKey, cfg.TokenTTL), orderProcessor)
 	server.Init(cfg, handler)
-}
-
-func migrate(dbURL string) {
-	db, err := sql.Open("pgx", dbURL)
-	defer func() {
-		err = db.Close()
-		if err != nil {
-			log.Errorf("could not close db connection:%s", err)
-		}
-	}()
-	if err != nil {
-		panic("could not run migration")
-	}
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-	if err := goose.Up(db, "./migrations"); err != nil {
-		panic(err)
-	}
 }
