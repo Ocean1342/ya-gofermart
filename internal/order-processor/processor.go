@@ -2,12 +2,9 @@ package orderprocessor
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"github.com/sirupsen/logrus"
 	accrualsystem "gofermart/internal/accrual-system"
 	"gofermart/internal/storage"
-	"io"
 	"time"
 )
 
@@ -68,8 +65,6 @@ func (op *OrderProcessor) Process(ctx context.Context) {
 }
 
 func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item OrderQueueItem) {
-	ctxProcess, cancel := context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
 	resp := op.AccrualService.OrderProcess(item.OrderID)
 	if resp == nil {
 		logger.Errorf("empty response from accrualService")
@@ -79,45 +74,16 @@ func (op *OrderProcessor) process(ctx context.Context, logger logrus.Entry, item
 	}
 	switch resp.StatusCode {
 	case 200:
-		var acResp AccrualResponse
-		bytes, err := io.ReadAll(resp.Body)
+		err := op.StatusOkHandle(ctx, logger, resp, item)
 		if err != nil {
-			logger.Errorf("could not read resp body. err: %v", err)
+			logger.Errorf("could not handle 200 response. err: %v", err)
 			item.RetryTimes++
 			op.Queue <- item
-			return
-		}
-		err = json.Unmarshal(bytes, &acResp)
-		if err != nil {
-			logger.Errorf("could not unmarshal resp body. err: %v", err)
-			item.RetryTimes++
-			op.Queue <- item
-			return
-		}
-		orderID, err := acResp.GetOrderID()
-		if err != nil {
-			logger.Errorf("could not convert Order id")
-			item.RetryTimes++
-			op.Queue <- item
-			return
-		}
-		logger.Infof("user id %d get raw accrual: %f counted accrual: %d", item.UserID, acResp.Accrual, acResp.GetAccrual())
-		err = op.Storage.UpdateOrderAndBalance(ctxProcess, orderID, item.UserID, acResp.GetAccrual(), acResp.GetStatus())
-		if err != nil {
-			logger.Errorf("UpdateOrderAndBalance err: %v", err)
-			item.RetryTimes++
-			op.Queue <- item
-			return
 		}
 	case 204:
-		bytes, err := io.ReadAll(resp.Body)
-		if err != nil && !errors.Is(err, io.EOF) {
-			logger.Errorf("recived 204. orderID %d read body err:%s", item.OrderID, err)
-		}
-		logger.Errorf("recived 204. orderID %d response body: %s", item.OrderID, string(bytes))
-		err = op.Storage.UpdateOrderAndBalance(ctxProcess, item.OrderID, item.UserID, 0, "INVALID")
+		err := op.StatusNoContentHandle(ctx, logger, resp, item)
 		if err != nil {
-			logger.Errorf("could not change status for order id:%d err:%v", item.OrderID, err)
+			logger.Errorf("could not handle 204 response. err: %v", err)
 		}
 	case 429:
 		logger.Errorf("too many requests.sleeps for 60 sec")
